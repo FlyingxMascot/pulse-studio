@@ -2,55 +2,59 @@
 
 **Student:** Humayun Shahid | **Roll no:** 24K-2011 | **Section:** BCY-5C | **Course:** CS4032 Web Programming, Assignment 02
 
-For this assignment I made Pulse Studio, a fictional small-group fitness studio in F-7, Islamabad, aimed at university students. On my site, visitors browse weekly classes, search and filter them, open a class, build a plan, fill in a short form and get a (simulated) booking confirmation.
+For this assignment I built Pulse Studio, a fictional small-group fitness studio in F-7 Markaz, Islamabad, designed specifically for university students and young professionals. On the site, visitors can browse weekly class schedules, search and filter offerings, view comprehensive class details with transparent pricing and conditions, build a customized booking plan with equipment rentals, fill out a controlled booking form, and receive a simulated booking confirmation.
 
-- GitHub: https://github.com/FlyingxMascot/pulse-studio
-- Live site: https://pulse-studio-tau.vercel.app/
+- **GitHub Repository:** https://github.com/FlyingxMascot/pulse-studio
+- **Live Deployment (Vercel):** https://pulse-studio-tau.vercel.app/
+- **Final Commit Hash:** fbce1c3388d4430774961791865197eb60b3aad6
 
 ## Commands
+```bash
+npm install      # install dependencies
+npm run dev      # run local development server
+npm run build    # produce optimized production build
+npm test         # run automated business rule tests via node --test
 ```
-npm install      # install
-npm run dev      # development server
-npm run build    # production build
-npm test         # runs: node --test (booking rule tests)
-```
 
-## Routes
-| Route | Purpose |
-|---|---|
-| `/` | Class list with search, filters, sort |
-| `/classes/:id` | Class details (invalid id shows a message) |
-| `/plan` | Edit selection, see summary, fill form |
-| `/confirmation` | Simulated booking result |
-
-## Operating rules (all in `src/rules/bookingRules.js`)
-1. **Capacity:** 1 to 4 spots per class and never more than seats left. Shown next to the spots box. 4 is allowed, 5 is blocked.
-2. **Eligibility:** advanced classes cannot be booked by someone who chose "Beginner". Error shows under the experience field.
-3. **Pricing:** 5 or more spots in a booking get 10% off class prices (mat rental not discounted). 4 spots: no discount, 5 spots: discount.
-
-## Reproducing edge cases
-- **Loading failure:** tick "Simulate loading failure" at the bottom of any page, then use "Try again" after unticking it.
-- **Changed availability:** add "Spin Sprint" to your plan, press "Make Spin Sprint full", open My plan. The line shows an error and booking is blocked until you remove it.
-- **Restored data:** in dev tools run `localStorage.setItem("pulse-studio-plan", '[{"id":999,"spots":2,"rentMat":false}]')` and refresh. The unknown class is removed with a notice.
-- **Bad URL:** visit `/classes/abc` or `/nothing-here`.
-- **Empty results:** search for `zzz`.
-
-## Simulated parts
-In my app, bookings are not sent anywhere and no payment is taken. Class loading is a fake delay in `src/api/loadClasses.js`.
-
-## Known limitations
-- I used text-only cards and did not add images.
-- I chose to clear the confirmation on refresh, so it is lost if the page reloads.
-
-## Concept map
-| Concept | File | Where |
+## Main Routes
+| Route | Purpose | Key Components |
 |---|---|---|
-| Routing + URL params | `src/App.jsx`, `ClassDetailsPage.jsx` | `Routes`, `useParams` |
-| Shared state (context) | `src/context/PlanContext.jsx` | `PlanProvider` |
-| Functional updates, immutable arrays | `PlanContext.jsx` | `addToPlan`, `setSpots`, `toggleMat` |
-| Async loading, effect cleanup | `PlanContext.jsx`, `src/api/loadClasses.js` | first `useEffect` |
-| localStorage | `PlanContext.jsx` | `readSavedPlan`, save effect |
-| Search/filter/sort in URL | `src/pages/ClassesPage.jsx` | `useSearchParams` |
-| Controlled form + validation | `src/components/BookingForm.jsx` | `validate`, `handleChange` |
-| Business rules + tests | `src/rules/bookingRules.js`, `tests/bookingRules.test.js` | `checkSpots` etc. |
-| Derived values | `PlanPage.jsx`, `bookingRules.js` | `calculateTotals` |
+| `/` | Weekly class timetable with search, multi-criteria filters, and sorting | `ClassesPage.jsx`, `FilterBar.jsx`, `ClassCard.jsx` |
+| `/classes/:id` | Parameterized class details view with full conditions, equipment inclusions, and spot status | `ClassDetailsPage.jsx`, `StatusMessage.jsx` |
+| `/plan` | Interactive selection summary, spot adjustments, mat rental toggles, and controlled booking form | `PlanPage.jsx`, `BookingForm.jsx` |
+| `/confirmation` | Simulated booking summary with unique reference ID and breakdown | `ConfirmationPage.jsx` |
+| `*` | 404 handler for invalid routes with recovery link | `NotFoundPage.jsx` |
+
+## Operating Rules (Implemented in `src/rules/bookingRules.js`)
+1. **Capacity Limit:** Each class allows 1 to 4 spots per booking and can never exceed remaining seats. The constraint is displayed directly adjacent to the input field. Booking 4 spots is accepted; booking 5 spots is blocked with immediate inline error feedback.
+2. **Eligibility & Prerequisites:** Advanced classes (e.g. HIIT Margalla, Advanced Ashtanga) require intermediate or advanced fitness experience. If a user selects "Beginner", the form blocks submission and highlights the ineligible class.
+3. **Pricing & Group Discount:** Bookings of 5 or more total spots automatically receive a 10% discount on class fees. Mat rentals (Rs 150/spot) are calculated separately and are non-discountable. A booking with 4 spots pays regular price; reaching 5 spots triggers the discount calculation.
+
+## Reproducing Edge Cases
+- **Loading Failure & Retry:** Check "Simulate loading failure" in the demo panel at the bottom of the page, click "Retry" to observe the error banner, then uncheck and click "Try again" to recover.
+- **Dynamic Seat Changes:** Add "Spin Sprint" (3 spots available) to your plan, click "Make Spin Sprint full" in the demo controls, then open `/plan`. An inline error prevents confirmation until the overbooked class is updated or removed.
+- **Stale / Corrupted LocalStorage:** Run `localStorage.setItem("pulse-studio-plan", '[{"id":999,"spots":2,"rentMat":false}]')` in the browser console and refresh. The application validates the IDs against live data, drops the non-existent class, and surfaces an explanatory notification banner.
+- **Invalid Route / Non-Existent Class:** Navigate directly to `/classes/999` or `/invalid-url`. The UI displays a friendly message explaining the record is missing with a button to return to the schedule.
+- **Empty Filter Results:** Search for `zzz` or combine incompatible filters. The view displays a helpful recovery state with a one-click "Clear all filters" button and suggested alternative classes.
+
+## Simulated Operations & Scope
+- **Simulated Booking:** No backend database or real payment processing is connected; the application generates a local booking reference (`PS-####`) and clears the active plan.
+- **Mock Data Loading:** Network latency is simulated via `src/api/loadClasses.js` with an asynchronous 400ms delay and configurable error injection.
+
+## Known Limitations
+- Text-focused typography and card layouts are used rather than heavy image banners to prioritize fast loading and high contrast.
+- Booking confirmation is held in React state and is reset upon page refresh.
+
+## Concept Map
+| Concept | File | Implementation Details |
+|---|---|---|
+| Routing & URL Parameters | `src/App.jsx`, `src/pages/ClassDetailsPage.jsx` | `BrowserRouter`, `<Routes>`, `<Route>`, `useParams` |
+| Shared State (Context API) | `src/context/PlanContext.jsx` | `PlanContext`, `PlanProvider`, `usePlan` custom hook |
+| Immutable Updates | `src/context/PlanContext.jsx` | `addToPlan`, `removeFromPlan`, `setSpots`, `toggleMat` using array spread and map |
+| Async Data Fetching & Cleanup | `src/context/PlanContext.jsx`, `src/api/loadClasses.js` | `useEffect` with cancellation flag, `async/await`, error state handling |
+| Browser Storage (`localStorage`) | `src/context/PlanContext.jsx` | Safe JSON parsing, automatic persistence effect, reconciliation on data load |
+| Synchronized Query Params | `src/pages/ClassesPage.jsx` | `useSearchParams` for search text, category filter, level filter, and sorting |
+| Controlled Form & Validation | `src/components/BookingForm.jsx` | Controlled inputs (`useState`), multi-rule validation, inline accessible error states |
+| Business Logic & Pure Functions | `src/rules/bookingRules.js` | `checkSpots`, `checkEligibility`, `calculateTotals` |
+| Automated Testing | `tests/bookingRules.test.js` | Node.js built-in test runner (`node:test`, `node:assert/strict`) |
+| Responsive Layouts & CSS | `src/styles/main.css` | Hand-authored modern CSS, CSS custom properties, 390px/1280px media queries |
