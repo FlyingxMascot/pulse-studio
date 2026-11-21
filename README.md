@@ -4,9 +4,8 @@
 
 For this assignment I made Pulse Studio, a fictional small-group fitness studio in F-7, Islamabad, aimed at university students. On my site, visitors browse weekly classes, search and filter them, open a class, build a plan, fill in a short form and get a (simulated) booking confirmation.
 
-- GitHub: PASTE LINK
-- Live site: PASTE LINK
-- Final commit: PASTE HASH
+- GitHub: https://github.com/FlyingxMascot/pulse-studio
+- Live site: https://pulse-studio-tau.vercel.app/
 
 ## Commands
 ```
