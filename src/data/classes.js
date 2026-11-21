@@ -1,0 +1,36 @@
+// Local data for Pulse Studio. Every class has a stable id used in URLs and the saved plan.
+// level: "beginner" | "intermediate" | "advanced"
+const classes = [
+  { id: 1, title: "Sunrise Vinyasa", type: "Yoga", level: "beginner", day: "Mon", time: "06:30", durationMin: 60, price: 1200, seatsLeft: 10, instructor: "Hira Qadir",
+    description: "A gentle flow that links breath and movement. Good first class if you have never done yoga.",
+    includes: ["Mat rental available", "Water station", "Cool-down stretch"], conditions: "Arrive 10 minutes early. Cancel free up to 12 hours before." },
+  { id: 2, title: "Power Core 45", type: "Strength", level: "intermediate", day: "Tue", time: "18:00", durationMin: 45, price: 1500, seatsLeft: 8, instructor: "Bilal Raza",
+    description: "Short, hard core session using bodyweight and light dumbbells.",
+    includes: ["Dumbbells provided", "Mat rental available"], conditions: "Cancel free up to 6 hours before. Late cancel is charged in full." },
+  { id: 3, title: "HIIT Margalla", type: "Cardio", level: "advanced", day: "Wed", time: "07:00", durationMin: 50, price: 1800, seatsLeft: 6, instructor: "Saad Mehmood",
+    description: "Interval training with sprints, jumps and heavy kettlebell work. Expect to be sweaty.",
+    includes: ["Kettlebells provided", "Towel service"], conditions: "Intermediate or advanced experience required. No free cancellation inside 12 hours." },
+  { id: 4, title: "Evening Stretch & Reset", type: "Yoga", level: "beginner", day: "Wed", time: "19:30", durationMin: 45, price: 1000, seatsLeft: 12, instructor: "Hira Qadir",
+    description: "Slow stretching to undo a day of lectures and desk time.",
+    includes: ["Mat rental available", "Herbal tea after class"], conditions: "Cancel free up to 4 hours before." },
+  { id: 5, title: "Spin Sprint", type: "Cardio", level: "intermediate", day: "Thu", time: "17:30", durationMin: 40, price: 1600, seatsLeft: 3, instructor: "Maha Tariq",
+    description: "Indoor cycling intervals to a loud playlist. Bike shoes are optional.",
+    includes: ["Bike setup help", "Towel service"], conditions: "Only 3 bikes left this week. Cancel free up to 8 hours before." },
+  { id: 6, title: "Barbell Basics", type: "Strength", level: "beginner", day: "Fri", time: "16:00", durationMin: 60, price: 1700, seatsLeft: 7, instructor: "Bilal Raza",
+    description: "Learn squat, deadlift and press with a coach watching your form.",
+    includes: ["Barbell and plates", "Form feedback"], conditions: "Wear flat shoes. Cancel free up to 12 hours before." },
+  { id: 7, title: "Jumuah Morning Run Club", type: "Cardio", level: "beginner", day: "Fri", time: "07:30", durationMin: 75, price: 800, seatsLeft: 15, instructor: "Saad Mehmood",
+    description: "Easy group run on the Margalla trail road. All paces welcome.",
+    includes: ["Group warm-up", "Route map"], conditions: "Meet at the studio gate. Cancelled if air quality is poor." },
+  { id: 8, title: "Advanced Ashtanga", type: "Yoga", level: "advanced", day: "Sat", time: "08:00", durationMin: 90, price: 2000, seatsLeft: 5, instructor: "Hira Qadir",
+    description: "Full primary series with arm balances and inversions.",
+    includes: ["Mat rental available", "Hands-on adjustments"], conditions: "Intermediate or advanced experience required. Cancel free up to 24 hours before." },
+  { id: 9, title: "Kettlebell Circuit", type: "Strength", level: "intermediate", day: "Sat", time: "10:30", durationMin: 50, price: 1600, seatsLeft: 9, instructor: "Maha Tariq",
+    description: "Rotating stations built around swings, cleans and carries.",
+    includes: ["Kettlebells provided", "Mat rental available"], conditions: "Cancel free up to 6 hours before." },
+  { id: 10, title: "Sunday Mobility Lab", type: "Yoga", level: "beginner", day: "Sun", time: "11:00", durationMin: 60, price: 1100, seatsLeft: 14, instructor: "Maha Tariq",
+    description: "Joint-friendly mobility drills for runners and lifters.",
+    includes: ["Foam rollers provided", "Mat rental available"], conditions: "Cancel free up to 12 hours before." },
+];
+
+export default classes;
