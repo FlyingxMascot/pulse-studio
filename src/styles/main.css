@@ -21,9 +21,10 @@ body {
   background: var(--paper);
   color: var(--text);
   line-height: 1.5;
+  overflow-wrap: break-word;
 }
 
-h1, h2, h3 { color: var(--ink); line-height: 1.2; }
+h1, h2, h3 { color: var(--ink); line-height: 1.2; overflow-wrap: break-word; }
 h1 { font-size: 1.9rem; }
 h2 { font-size: 1.3rem; }
 h3 { font-size: 1.1rem; margin: 0 0 .25rem; }

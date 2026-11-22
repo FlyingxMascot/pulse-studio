@@ -42,10 +42,12 @@ export function calculateTotals(lines) {
   let minutes = 0;
 
   for (const line of lines) {
-    spots += line.spots;
-    classTotal += line.price * line.spots;
-    if (line.rentMat) matTotal += MAT_RENTAL_FEE * line.spots;
-    minutes += line.durationMin * line.spots;
+    // Safely handle cleared or non-integer spots without crashing or producing NaN
+    const count = Number.isInteger(line.spots) && line.spots > 0 ? line.spots : 0;
+    spots += count;
+    classTotal += line.price * count;
+    if (line.rentMat) matTotal += MAT_RENTAL_FEE * count;
+    minutes += line.durationMin * count;
   }
 
   const discountApplies = spots >= GROUP_DISCOUNT_FROM;

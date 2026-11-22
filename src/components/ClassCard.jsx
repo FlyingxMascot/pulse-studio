@@ -18,7 +18,8 @@ export default function ClassCard({ item, inPlan, onAdd, onRemove }) {
 
       <p className="price">Rs {item.price.toLocaleString()} <span className="muted">per spot</span></p>
       <p className={isFull ? "status status-bad" : item.seatsLeft <= 3 ? "status status-warn" : "status"}>{seatsText}</p>
-      <p className="small">{item.conditions}</p>
+      {/* Fallback so missing conditions text does not render empty or break */}
+      <p className="small">{item.conditions || "Not provided"}</p>
 
       <div className="card-actions">
         <Link className="btn btn-secondary" to={`/classes/${item.id}`}>Details</Link>

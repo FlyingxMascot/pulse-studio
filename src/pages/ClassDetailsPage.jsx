@@ -32,7 +32,8 @@ export default function ClassDetailsPage() {
       <p><Link to="/">Back to classes</Link></p>
       <h1>{item.title}</h1>
       <p className="muted">{item.type} - {item.level} - {item.day} {item.time} - {item.durationMin} min - with {item.instructor}</p>
-      <p>{item.description}</p>
+      {/* Defensive fallback for missing description */}
+      <p>{item.description || "Not provided"}</p>
 
       <section className="panel" aria-labelledby="price-heading">
         <h2 id="price-heading">Price and rules</h2>
@@ -44,12 +45,22 @@ export default function ClassDetailsPage() {
           {item.level === "advanced" && <li>Intermediate or advanced experience required</li>}
         </ul>
         <p className={isFull ? "status status-bad" : "status"}>{isFull ? "Full" : `${item.seatsLeft} spots left`}</p>
-        <p>{item.conditions}</p>
+        {/* Defensive fallback for missing conditions */}
+        <p>{item.conditions || "Not provided"}</p>
       </section>
 
       <section aria-labelledby="inc-heading">
         <h2 id="inc-heading">What is included</h2>
-        <ul>{item.includes.map((text) => <li key={text}>{text}</li>)}</ul>
+        {/* Guard against missing, non-array, or empty includes list */}
+        {Array.isArray(item.includes) && item.includes.length > 0 ? (
+          <ul>
+            {item.includes.map((text, idx) => (
+              <li key={text || idx}>{text}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>Not provided</p>
+        )}
       </section>
 
       {inPlan ? (

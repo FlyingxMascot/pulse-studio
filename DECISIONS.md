@@ -1,89 +1,106 @@
 # Frontend Decisions — Humayun Shahid (24K-2011)
 
-This document records three core architectural and interaction decisions made while developing Pulse Studio, addressing concrete problems observed in existing fitness and class booking platforms.
+This document records three core architectural and interaction decisions made while developing Pulse Studio, addressing concrete problems observed during reference site investigations.
 
 ---
 
 ## Decision 1: URL Query State Synchronization & Persistent Selection (Interaction / State)
 
-- **Problem Addressed:**  
-  On reference platforms such as **Mindbody Web Explorer** (`https://www.mindbodyonline.com/explore`) and **ClassPass** (`https://classpass.com`), applying search queries and category filters (e.g., filtering for Yoga classes on Wednesday) is stored strictly in transient component state. When a user clicks on an individual class to inspect instructor bio or facility amenities and subsequently clicks the browser's "Back" button, all active filter parameters are completely wiped, returning the user to the unfiltered Monday view. Furthermore, if a user selects a class and then changes categories, their selected item vanishes from view with zero indication of whether the item is still reserved in their cart or was dropped.
+- **Problem:**  
+  On Mindbody (https://www.mindbodyonline.com/explore), when I applied filters and then went back, or reloaded the page, the filters I had applied were reset.
 
-- **Decision Chosen:**  
-  1. Synchronize all filtering (type, difficulty level), text search (`q`), and sort order (`sort`) directly into the browser URL query string via `useSearchParams` with history replacement.
-  2. Maintain selected classes globally in `PlanContext` independently of the active filter view.
-  3. When an active filter conceals one or more classes currently in the user's booking plan, render a dedicated status message: *"[N] class(es) in your plan are hidden by these filters. View your plan"*.
+- **Possible business consequence:**  
+  May cause users to become frustrated having to re-apply filters repeatedly and abandon planning their class schedule.
 
-- **Alternative Considered:**  
-  Persist filter state in standard component `useState` and wipe selections whenever a user leaves the browsing page, or reset filters on each navigation.
+- **Decision:**  
+  Store filters (search text `q`, category `type`, difficulty `level`, and sort order `sort`) in the URL query string using `useSearchParams` with `{ replace: true }`, maintain selected classes in `PlanContext`, and display a notification message when an active filter hides classes currently in the plan.
+
+- **Alternative:**  
+  Store filter state in component local state (`useState`) and clear selections or reset filter dropdowns on navigation.
 
 - **Reason:**  
-  Students frequently compare classes across disparate categories (e.g., balancing a high-intensity cardio session on Tuesday with a recovery yoga flow on Friday). Forcing users to re-apply their search terms and filters upon every navigation creates severe interaction fatigue. Providing an explicit visual bridge to hidden selections eliminates uncertainty and prevents accidental duplicate bookings.
+  Keeps filter state persistent across browser back/forward navigation and page reloads, and ensures users do not lose track of classes already in their plan when switching filter categories.
 
 - **Tradeoff:**  
-  Requires URL serialization logic, synchronization between the router and state, and additional conditional notification elements in the DOM.
+  Requires URL query parameter parsing and serialization logic, along with synchronizing URL state with active context selections.
 
-- **Code Location:**  
-  `src/pages/ClassesPage.jsx` (`changeFilter`, `hiddenInPlan`, lines 13–27, 52–55, 72–77) and `src/context/PlanContext.jsx`.
+- **Code location:**  
+  `src/pages/ClassesPage.jsx` (`ClassesPage`, `changeFilter`), `src/context/PlanContext.jsx` (`PlanProvider`, `usePlan`).
 
 - **Evidence:**  
-  1. Navigate to `/?type=Yoga`.
-  2. Add "Sunrise Vinyasa" to plan.
-  3. Switch filter to `type=Cardio`.
-  4. Notice the informational banner: *"1 class in your plan is hidden by these filters. View your plan"*.
-  5. Click browser Back/Forward; notice filters and selections persist accurately without data loss.
+  1. Open `/?type=Yoga` on the homepage.
+  2. Click "Add to plan" on Sunrise Vinyasa.
+  3. Change the type filter dropdown to "Cardio".
+  4. Notice the message banner: *"1 class in your plan is hidden by these filters. View your plan"*.
+  5. Click the browser Back button; notice the filter returns to `/?type=Yoga` and Sunrise Vinyasa is still in the plan.
 
 ---
 
 ## Decision 2: Upfront Pricing, Cancellation Terms, and Dynamic Capacity (Information Hierarchy)
 
-- **Problem Addressed:**  
-  On several commercial fitness booking platforms (including local Pakistani boutique studio portals such as **Studio 8 Fitness** `https://studio8.pk` and **FitFlex**), class listing cards display only teaser baseline figures (e.g., "From Rs 1,200"). Critical financial and operational constraints—such as mandatory equipment hire fees (mat rental), cancellation notice windows (e.g., "Cancel free up to 12 hours before"), remaining seat counts, and group booking rules—are concealed until the final checkout or payment modal. Customers only discover strict cancellation policies or surcharge fees after having already invested time entering personal information.
+- **Problem:**  
+  On PureGym (https://www.puregym.com/classes/), the full cost, equipment charges and cancellation cutoff were not shown until the final checkout page.
 
-- **Decision Chosen:**  
-  Adopt an upfront, layered information hierarchy:
-  1. **Listing Cards (`ClassCard.jsx`):** Disclose base price per spot (`Rs 1,200`), exact seats remaining with color-coded status badges, and cancellation policies directly on every card.
-  2. **Details Route (`ClassDetailsPage.jsx`):** Provide a comprehensive "Price and rules" breakdown detailing optional mat rental costs (`Rs 150/spot`), spot limits (1–4), experience prerequisites, and group discount eligibility (10% off for 5+ spots).
-  3. **Plan View (`PlanPage.jsx`):** Display a real-time line-by-line summary itemizing class subtotals, mat fees, group discount deductions, and net total.
+- **Possible business consequence:**  
+  May cause users to drop out at the final checkout step when unexpected fees or restrictive cancellation rules appear.
 
-- **Alternative Considered:**  
-  Keep cards minimalist by showing only class title, time, and instructor, deferring pricing breakdowns and operational conditions to a pop-up modal at final submission.
+- **Decision:**  
+  Display the price per spot, seats left, and cancellation condition directly on class cards, provide a full "Price and rules" breakdown (including Rs 150 mat rental, 1 to 4 spots limit, and group discount) on the class details page, and show an itemized summary on the plan page.
+
+- **Alternative:**  
+  Show only basic class titles and starting prices on listing cards, deferring mat rental fees and cancellation cutoffs to a final checkout screen.
 
 - **Reason:**  
-  University students and budget-conscious gym-goers need complete financial clarity before committing. Surfacing all fees and rules upfront builds trust, reduces cart abandonment, and ensures students choose classes that suit their budget and schedule.
+  Surfacing all pricing and conditions upfront gives students complete clarity before they invest time filling out forms, reducing surprise fees and dropouts.
 
 - **Tradeoff:**  
-  Cards and detail views contain denser textual information, requiring careful typographic hierarchy, spacing, and responsive wrapping to remain legible on smaller mobile screens.
+  Cards and details views include more textual information, requiring clear typographic hierarchy and spacing.
 
-- **Code Location:**  
-  `src/components/ClassCard.jsx` (lines 14–37), `src/pages/ClassDetailsPage.jsx` (lines 37–48), and `src/pages/PlanPage.jsx` (lines 78–91).
+- **Code location:**  
+  `src/components/ClassCard.jsx` (`ClassCard`), `src/pages/ClassDetailsPage.jsx` (`ClassDetailsPage`), `src/pages/PlanPage.jsx` (`PlanPage`).
 
 - **Evidence:**  
-  Inspect class listings and detail views at both desktop (1280px) and mobile (390px) viewports; all pricing rates, remaining seats, equipment rental fees, and cancellation cutoff rules are immediately visible before any booking action is taken.
+  1. Open `/` and inspect any class card (e.g. Sunrise Vinyasa); observe the price per spot (Rs 1,200), remaining spots, and cancellation condition ("Arrive 10 minutes early. Cancel free up to 12 hours before.") directly on the card.
+  2. Click "Details" to open `/classes/1`; inspect the "Price and rules" section detailing optional mat rental (+Rs 150), spot limit (1 to 4), and group discount eligibility.
+  3. Click "Add to plan" and navigate to `/plan`; view the itemized summary detailing spots, class subtotal, mat rental fees, group discount, and net total.
 
 ---
 
 ## Decision 3: Guided Recovery for Zero-Result States and Mobile-First Touch Targets (Mobile Layout & Recovery)
 
-- **Problem Addressed:**  
-  On standard booking websites, submitting a query with no matches (e.g., searching for an unavailable instructor, a non-existent sport like "Swimming", or combining overly restrictive filters) results in a blank, unstyled container displaying raw text like "0 results found". The user is left at a dead end with no suggestions or clear way forward. Furthermore, on viewports under 400px, filter controls often overlap, input boxes shrink below 30px in height, and touch targets become difficult to tap accurately.
+- **Problem:**  
+  On ClassPass (https://classpass.com/search), when a search had no results, nothing helped a user who did not know how to set filters properly (no suggested alternatives), and many controls were very small and hard to tap on mobile.
 
-- **Decision Chosen:**  
-  1. Construct an explicit empty state component that distinguishes between an unpopulated schedule and a filter mismatch.
-  2. For zero-match search/filter combinations, explain the issue clearly, provide a prominent one-tap `"Clear all filters"` button, and dynamically render a list of 3 suggested alternative classes that match the search keyword.
-  3. Enforce a minimum 44px touch target height across all interactive elements (`input`, `select`, `button`), convert the multi-column plan layout into a single vertical stack on mobile (`@media (max-width: 700px)`), and maintain accessible focus rings.
+- **Possible business consequence:**  
+  May cause users on mobile devices to encounter a dead end, mis-tap small controls, and leave the site.
 
-- **Alternative Considered:**  
-  Display only a standard alert box stating "No classes match your search" and require the user to manually reset each dropdown individually.
+- **Decision:**  
+  Provide an empty state with an explanatory message, a "Clear all filters" button, and three suggested alternative classes, while enforcing a minimum height of 44px on buttons, inputs, and selects and stacking plan rows into a single column on mobile.
+
+- **Alternative:**  
+  Show a static "No classes found" text without suggested alternatives or reset buttons, and leave form controls at default unpadded browser heights.
 
 - **Reason:**  
-  Users searching on mobile devices while commuting or between university classes should never experience an interaction dead-end. Providing suggested alternatives keeps the discovery journey active and dramatically reduces bounce rates.
+  Prevents users from getting stuck in a dead-end state and ensures touch targets are comfortable and easy to tap on mobile phone screens.
 
 - **Tradeoff:**  
-  Suggested alternative classes may not perfectly match the user's initial granular intent and require additional filtering computations in React.
+  Suggested alternatives require fallback filtering logic, and 44px touch targets occupy more vertical space on compact screens.
 
-- **Code Location:**  
-  `src/pages/ClassesPage.jsx` (lines 56–58, 86–97) and `src/styles/main.css` (lines 53–55, 69–71, 114–121).
+- **Code location:**  
+  `src/pages/ClassesPage.jsx` (`ClassesPage`), `src/styles/main.css` (`.btn`, `input`, `select`, `@media (max-width: 700px)`).
 
 - **Evidence:**  
-  Enter `"zzz"` in the search input or combine "Cardio" with "Beginner" when no slots match. The UI surfaces the clear-filters button alongside alternative class recommendations, while maintaining accessible 44px+ touch targets on 390px mobile viewports.
+  1. In the search input on `/`, type "zzz".
+  2. Observe the message "No classes match your search", the "Clear all filters" button, and 3 suggested classes in "Other classes you might like".
+  3. Click "Clear all filters" to reset the search and view all classes again.
+  4. In browser DevTools, switch to a mobile viewport (e.g. 390px); notice all buttons, inputs, and selects maintain at least 44px height, and plan items stack into a single column.
+
+---
+
+## Verification notes
+
+| Improvement | Actions | Expected | Observed |
+|---|---|---|---|
+| URL Query State Synchronization | Open `/?type=Yoga`, add Sunrise Vinyasa to plan, change filter dropdown to `type=Cardio`, then reload or press Back. | Notice the banner "1 class in your plan is hidden by these filters. View your plan". Clicking Back restores `/?type=Yoga` and Sunrise Vinyasa remains in the plan. | Verified by testing URL query params and reading `ClassesPage.jsx` and `PlanContext.jsx`. |
+| Upfront Pricing & Information Hierarchy | View cards on `/`, navigate to `/classes/1`, adjust spots on `/plan`. | Class card displays Rs 1,200/spot, remaining spots, and cancellation condition; details page shows full "Price and rules" breakdown; `/plan` displays real-time itemized calculation and applies 10% discount at 5 spots. | Verified by checking UI rendering and running automated business rule tests (5/5 pass). |
+| Zero-Result Recovery & 44px Mobile Controls | Type "zzz" into search input on `/`; inspect interactive element heights in responsive mode at 390px width. | Zero-result state displays "Clear all filters" button and 3 alternative recommendations; buttons, inputs, and selects maintain a minimum height of 44px; plan line items stack vertically. | Verified by testing "zzz" search and checking CSS rules in `src/styles/main.css`. |

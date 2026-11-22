@@ -58,9 +58,20 @@ export default function PlanPage() {
 
               <div className="field">
                 <label htmlFor={`spots-${line.id}`}>Spots (1 to {MAX_SPOTS_PER_CLASS})</label>
-                <input id={`spots-${line.id}`} type="number" value={line.spots}
-                  onChange={(e) => setSpots(line.id, Number(e.target.value))}
-                  aria-invalid={!check.ok} aria-describedby={!check.ok ? `spots-error-${line.id}` : undefined} />
+                <input
+                  id={`spots-${line.id}`}
+                  type="number"
+                  min="1"
+                  max={MAX_SPOTS_PER_CLASS}
+                  value={line.spots ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    // Keep empty string if user clears the input box so it doesn't show NaN or immediately revert
+                    setSpots(line.id, val === "" ? "" : Number(val));
+                  }}
+                  aria-invalid={!check.ok}
+                  aria-describedby={!check.ok ? `spots-error-${line.id}` : undefined}
+                />
                 {!check.ok && <p id={`spots-error-${line.id}`} className="error">{check.message}</p>}
               </div>
 
