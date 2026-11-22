@@ -6,7 +6,7 @@ For this assignment I built Pulse Studio, a fictional small-group fitness studio
 
 - **GitHub Repository:** https://github.com/FlyingxMascot/pulse-studio
 - **Live Deployment (Vercel):** https://pulse-studio-tau.vercel.app/
-- **Final commit:** see report (updated after final push)
+- **Final commit:** a9ee6821ad2a966e75ce7103d51333587f0e268c
 
 ## Commands
 ```bash
